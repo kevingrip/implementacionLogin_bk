@@ -4,10 +4,10 @@ class UserCollectionManager {
     constructor() {
     }
 
-    createUser = async (firstName,lastName,email,password,role) => {
+    createUser = async (firstName,lastName,email,password) => {
         try {
 
-            const newUser = {firstName,lastName,email,password,role}
+            const newUser = {firstName,lastName,email,password}
 
             await userModel.create(newUser);
 

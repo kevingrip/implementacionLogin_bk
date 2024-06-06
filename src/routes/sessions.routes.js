@@ -42,13 +42,13 @@ router.post('/register', async (req, res) => {
         const lastName = req.body.lastName;
         const email = req.body.email;
         const password = req.body.password;
-        const role = req.body.role;
+        // const role = req.body.role;
 
         const checkUser = await userManager.getUser(email);
         console.log(checkUser)
 
         if (checkUser === null) {
-            await userManager.createUser(firstName, lastName, email, password, role);
+            await userManager.createUser(firstName, lastName, email, password);
             res.status(200).send({ origin: config.SERVER, payload: 'Usuario creado!' });
         } else {
             return res.status(500).send({ origin: config.SERVER, payload: 'El mail ya se encuentra registrado'})
