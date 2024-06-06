@@ -3,19 +3,40 @@
 import express from 'express';
 import config from './config.js';
 import {Server} from 'socket.io'
+import session from 'express-session';
+import handlebars from 'express-handlebars';
+import cookieParser from 'cookie-parser';
+import mongoose from 'mongoose';
+//import FileStore from 'session-file-store';
+import MongoStore from 'connect-mongo';
+
+
+import cookieRouter from './routes/cookies.routes.js';
 import router from './routes/users.routes.js';
 import productRoutes from './routes/product.routes.js';
 import cartRoutes from './routes/cart.routes.js';
-import handlebars from 'express-handlebars';
 import viewsRouter from './routes/views.routes.js';
-import mongoose from 'mongoose';
+import sessionRouter from './routes/sessions.routes.js'
+
 
 let messages = [];
 
 const app = express();
+//const FileStorage = FileStore(session);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true}));
+app.use(cookieParser());
+app.use(session({
+    // store: new FileStorage({ path: '/.sessions', ttl:100, retries:0 }),
+    store: MongoStore.create({
+        mongoUrl:config.mongoDB_Atlas,
+        ttl: 15
+    }),
+    secret: config.SECRET,
+    resave: true,
+    saveUninitialized: true
+}));
 
 app.engine('handlebars', handlebars.engine());
 app.set('views', `${config.DIRNAME}/views`);
@@ -25,7 +46,10 @@ app.use('/', viewsRouter)
 app.use('/api/users',router);
 app.use('/api/product',productRoutes);
 app.use('/api/cart',cartRoutes);
+app.use('/api/cookies', cookieRouter);
 app.use('/static',express.static(`${config.DIRNAME}/public`));
+app.use('/api/sessions', sessionRouter)
+
 
 const httpServer = app.listen(config.PORT, async ()=>{
     await mongoose.connect(config.mongoDB_Atlas);
@@ -38,6 +62,7 @@ const socketServer = new Server(httpServer);
 // En este caso lo aprovechamos para socketServer, que luego recuperaremos
 // desde los endpoints donde necesitemos publicar mensajes Websockets.
 app.set('socketServer', socketServer);
+
 
 socketServer.on('connection', client => {
     /**

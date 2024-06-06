@@ -1,4 +1,7 @@
 <div style="margin: 20px;">
+    <h5>Bienvenido: {{user.firstName}}, {{user.lastName}}</h5>
+    <p>Se ha logueado correctamente con el rol: {{user.role}}</p>
+
     <h1>Listado de Productos RealTime</h1>
     
     <ul id="productsList" class="list-group" method="delete" enctype="multipart/form-data">
@@ -46,6 +49,11 @@
 
 
         <button type="submit" class="btn btn-success" style="margin: 10px;">Cargar</button>
+    </form>
+</div>
+<div>
+    <form action="/api/sessions/logout" method="get">
+        <button type="submit" class="btn btn-success">Salir</button>
     </form>
 </div>
 

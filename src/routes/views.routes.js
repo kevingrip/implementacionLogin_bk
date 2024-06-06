@@ -1,12 +1,12 @@
 import { Router } from "express";
-import ProductManager from "../dao/productManager.js";
+// import ProductManager from "../dao/productManager.js";
 import ProductCollectionManager from "../dao/ProductManagerMdb.js";
-import productModel from "../dao/models/product.model.js";
+// import productModel from "../dao/models/product.model.js";
 
 const viewsRouter = Router();
 
 const productJson = './src/product.json'
-const manager = new ProductManager(productJson);
+// const manager = new ProductManager(productJson);
 const dbManager = new ProductCollectionManager()
 
 viewsRouter.get('/bienvenida', (req,res)=>{
@@ -16,14 +16,18 @@ viewsRouter.get('/bienvenida', (req,res)=>{
 
 
 viewsRouter.get('/realtimeproducts',async (req,res)=>{
-    const pageNum = req.query.page || 1;
-    const limit = req.query.limit || 3;
-    const category = req.query.query;
-    const sort = req.query.sort;
-    const productsData = await dbManager.getAllProductsDB(pageNum,limit,sort,category);
+    if (req.session.user){
+        const pageNum = req.query.page || 1;
+        const limit = req.query.limit || 3;
+        const category = req.query.query;
+        const sort = req.query.sort;
+        const productsData = await dbManager.getAllProductsDB(pageNum,limit,sort,category);
 
+        res.render('realTimeProducts', {productsData: productsData ,user: req.session.user});
+    } else {
+        res.redirect('/login');
+    }
 
-    res.render('realTimeProducts', {productsData: productsData});
 })
 
 viewsRouter.post('/realtimeproducts',async (req,res)=>{
@@ -53,6 +57,30 @@ viewsRouter.get('/home',async (req,res)=>{
 viewsRouter.get('/chat',(req,res)=>{
     res.render('chat',{})
 });
+
+viewsRouter.get('/register',(req,res)=>{
+    res.render('register',{})
+});
+
+viewsRouter.get('/login',(req,res)=>{
+    if (req.session.user){
+        res.redirect('/realTimeProducts')
+    }else{
+        res.render('login',{})
+    }
+    
+});
+
+viewsRouter.get('/profile',(req,res)=>{
+    if (req.session.user){
+        res.render('profile',{ user: req.session.user })
+    } else {
+        res.redirect('/login');
+    } 
+    
+});
+
+
 
 
 
